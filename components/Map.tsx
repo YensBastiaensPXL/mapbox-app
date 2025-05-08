@@ -17,7 +17,7 @@ export default function Map() {
                 setHasPermission(true);
             }
         })();
-    }, []);
+    });
 
     const centerToUser = async () => {
         const location = await Location.getCurrentPositionAsync({});
@@ -36,9 +36,11 @@ export default function Map() {
 
     return (
         <View style={StyleSheet.absoluteFill}>
-            <MapView style={StyleSheet.absoluteFill} styleURL="mapbox://styles/mapbox/outdoors-v12">
+            <MapView style={StyleSheet.absoluteFill}
+                     styleURL="mapbox://styles/mapbox/outdoors-v12"
+                     logoEnabled={false}
+                     attributionEnabled={false}>
                 <Camera ref={cameraRef} />
-
                 <LocationPuck puckBearing="heading" puckBearingEnabled />
             </MapView>
 
