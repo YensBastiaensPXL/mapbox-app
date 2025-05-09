@@ -8,31 +8,42 @@ const errorListener = (region: any, err: any) => {
     console.error('Fout bij downloaden:', err);
 };
 
-export const downloadTMBMap = async () => {
+export const downloadTMBMap = async (
+    setProgress: (value: number) => void,
+    onComplete?: () => void,
+    onError?: (err: unknown) => void
+) => {
     const bounds: [[number, number], [number, number]] = [
-        [6.50, 45.70], // Zuidwest - iets onder Les Chapieux
-        [7.30, 46.10], // Noordoost - iets boven Trient en Orsières
+        [6.6458, 45.6889], // Zuidwest (min lon, min lat)
+        [7.1631, 46.1158], // Noordoost (max lon, max lat)
     ];
 
     try {
         await offlineManager.createPack(
             {
                 name: 'tmb-offline',
-                styleURL: StyleURL.Outdoors,
+                styleURL: "mapbox://styles/yensb/cmafr3ohl00v601skf107bsla",
                 minZoom: 10,
                 maxZoom: 22,
                 bounds,
-                metadata: {
-                    trail: 'Tour du Mont Blanc',
-                },
+                metadata: { trail: 'TMB' },
             },
-            progressListener,
-            errorListener
+            (region, status) => {
+                const percent = parseFloat(status.percentage.toFixed(1));
+                setProgress(percent);
+                if (percent >= 100 && onComplete) onComplete();
+            },
+            (region, err) => {
+                console.error('Download fout:', err);
+                if (onError) onError(err);
+            }
         );
-    } catch (err) {
-        console.error('Kan TMB-kaart niet downloaden:', err);
+    } catch (e) {
+        console.error('Pack maken fout:', e);
+        if (onError) onError(e);
     }
 };
+
 
 export const deleteOfflinePack = async (name: string = 'tmb-offline') => {
     try {
@@ -40,11 +51,11 @@ export const deleteOfflinePack = async (name: string = 'tmb-offline') => {
         const existing = packs.find(p => p.name === name);
         if (existing) {
             await offlineManager.deletePack(name);
-            console.log(`✅ Offline pack '${name}' verwijderd.`);
+            console.log(`✅ Offline pack '${name}' deleted.`);
         } else {
-            console.log(`ℹ️ Geen offline pack gevonden met naam: ${name}`);
+            console.log(`ℹ️ No offline pack found with name: ${name}`);
         }
     } catch (err) {
-        console.error('❌ Fout bij verwijderen offline pack:', err);
+        console.error('❌ Error when deleting pack:', err);
     }
 };
