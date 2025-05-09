@@ -2,6 +2,7 @@ import Mapbox, { Camera, LocationPuck, MapView } from "@rnmapbox/maps";
 import * as Location from "expo-location";
 import { useEffect, useRef, useState } from "react";
 import { Button, StyleSheet, View } from "react-native";
+import {downloadTMBMap} from "@/utils/offlineMapbox";
 
 // Mapbox.setAccessToken('sk.eyJ1IjoieWVuc2IiLCJhIjoiY21hNXJnYmd0MGlzNTJpczZ5NXF3ZGdhOCJ9.7Tum822-jbAS7Z0JBeH_UQ');
 Mapbox.setAccessToken(
