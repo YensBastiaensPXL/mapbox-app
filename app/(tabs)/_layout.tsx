@@ -1,7 +1,7 @@
 import {Tabs} from 'expo-router';
 import {Ionicons} from '@expo/vector-icons';
-import {Button} from "react-native";
-import {downloadTMBMap} from "@/utils/offlineMapbox";
+import {Button, View} from "react-native";
+import {deleteOfflinePack, downloadTMBMap} from "@/utils/offlineMapbox";
 
 export default function TabLayout() {
     return (
@@ -14,7 +14,11 @@ export default function TabLayout() {
                         <Ionicons name="map-outline" size={size} color={color}/>
                     ),
                     headerRight: () => (
-                        <Button title="⬇️" onPress={downloadTMBMap}/>
+                        <View style={{ flexDirection: 'row', gap: 10, marginRight: 10}}>
+                            <Button title="⬇️" onPress={downloadTMBMap}/>
+                            <Button title={"🗑️"} onPress={() => deleteOfflinePack()} />
+                        </View>
+
                     ),
                 }}
             />
@@ -29,6 +33,5 @@ export default function TabLayout() {
                 }}
             />
         </Tabs>
-
     );
 }
