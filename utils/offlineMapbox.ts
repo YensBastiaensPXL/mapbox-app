@@ -1,4 +1,4 @@
-import { offlineManager, StyleURL } from '@rnmapbox/maps';
+import {offlineManager, StyleURL} from '@rnmapbox/maps';
 
 const progressListener = (region: any, status: { percentage: number; }) => {
     console.log(`Downloadprogressie: ${status.percentage.toFixed(2)}%`);
