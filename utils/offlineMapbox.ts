@@ -14,9 +14,21 @@ export const downloadTMBMap = async (
     onError?: (err: unknown) => void
 ) => {
     const bounds: [[number, number], [number, number]] = [
-        [6.6458, 45.6889], // Zuidwest (min lon, min lat)
+        [6.6753, 45.6889], // Zuidwest (min lon, min lat)
         [7.1631, 46.1158], // Noordoost (max lon, max lat)
     ];
+
+    try {
+        const existing = await offlineManager.getPack('tmb-offline');
+        if (existing) {
+            await offlineManager.deletePack('tmb-offline');
+        }
+        await offlineManager.resetDatabase(); // ← wist alles wél op v10
+
+    } catch (e) {
+        console.error('Fout bij voorbereiding download:', e);
+    }
+
 
     try {
         await offlineManager.createPack(

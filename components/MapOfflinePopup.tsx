@@ -7,6 +7,9 @@ import {deleteOfflinePack, downloadTMBMap} from '@/utils/offlineMapbox';
 export default function MapOfflinePopup() {
     const [visible, setVisible] = useState(false);
     const [progress, setProgress] = useState(0);
+    const [isDownloading, setIsDownloading] = useState(false);
+    const [deleteMessage, setDeleteMessage] = useState('');
+    const [downloadMessage, setDownloadMessage] = useState('');
 
     const handleDownload = () => {
         setIsDownloading(true);
@@ -24,18 +27,11 @@ export default function MapOfflinePopup() {
         );
     };
 
-
-    const [isDownloading, setIsDownloading] = useState(false);
-    const [deleteMessage, setDeleteMessage] = useState('');
-    const [downloadMessage, setDownloadMessage] = useState('');
-
-
     return (
         <>
             <TouchableOpacity onPress={() => setVisible(true)} style={styles.iconButton}>
                 <Ionicons name="map-outline" size={24} color="black"/>
             </TouchableOpacity>
-
             {/* Popup */}
             <Modal
                 visible={visible}
@@ -57,8 +53,8 @@ export default function MapOfflinePopup() {
                                 await deleteOfflinePack();
                                 setDeleteMessage('✅ Kaart verwijderd');
                                 setTimeout(() => setDeleteMessage(''), 3000);
-                                setProgress(0);              // reset voortgangsbalk
-                                setIsDownloading(false);     // just in case
+                                setProgress(0);
+                                setIsDownloading(false);
                             }}
                         />
 
