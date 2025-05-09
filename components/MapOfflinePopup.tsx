@@ -1,8 +1,9 @@
-import React, {useState} from 'react';
-import {Modal, View, Text, Button, StyleSheet, TouchableOpacity} from 'react-native';
-import {Ionicons} from '@expo/vector-icons';
+import React, { useState } from 'react';
+import { Modal, View, Text, Button, StyleSheet, TouchableOpacity } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import * as Progress from 'react-native-progress';
-import {deleteOfflinePack, downloadTMBMap} from '@/utils/offlineMapbox';
+import { deleteOfflinePack, downloadTMBMap } from '@/utils/offlineMapbox';
+import * as Network from 'expo-network';
 
 export default function MapOfflinePopup() {
     const [visible, setVisible] = useState(false);
@@ -10,19 +11,34 @@ export default function MapOfflinePopup() {
     const [isDownloading, setIsDownloading] = useState(false);
     const [deleteMessage, setDeleteMessage] = useState('');
     const [downloadMessage, setDownloadMessage] = useState('');
+    const [errorMessage, setErrorMessage] = useState('');
 
-    const handleDownload = () => {
+    const handleDownload = async () => {
         setIsDownloading(true);
+        setErrorMessage('');
+        setProgress(0);
+
+        const networkState = await Network.getNetworkStateAsync();
+        if (!networkState.isConnected || !networkState.isInternetReachable) {
+            setIsDownloading(false);
+            setErrorMessage('No internet connection. Please connect and try again.');
+            setTimeout(() => setErrorMessage(''), 4000);
+            return;
+        }
+
         downloadTMBMap(
             setProgress,
             () => {
-                console.log('✅ Download klaar');
+                console.log('Download complete');
                 setIsDownloading(false);
-                setDownloadMessage('✅ Download voltooid');
+                setDownloadMessage('Download complete');
                 setTimeout(() => setDownloadMessage(''), 3000);
             },
-            () => {
+            (err) => {
                 setIsDownloading(false);
+                console.error('Download error:', err);
+                setErrorMessage('Download failed. Please try again.');
+                setTimeout(() => setErrorMessage(''), 4000);
             }
         );
     };
@@ -30,9 +46,9 @@ export default function MapOfflinePopup() {
     return (
         <>
             <TouchableOpacity onPress={() => setVisible(true)} style={styles.iconButton}>
-                <Ionicons name="map-outline" size={24} color="black"/>
+                <Ionicons name="map-outline" size={24} color="black" />
             </TouchableOpacity>
-            {/* Popup */}
+
             <Modal
                 visible={visible}
                 transparent
@@ -41,17 +57,16 @@ export default function MapOfflinePopup() {
             >
                 <View style={styles.overlay}>
                     <View style={styles.popup}>
-                        <Text style={styles.title}>Offline kaart</Text>
+                        <Text style={styles.title}>Offline map</Text>
 
-                        <Button title="⬇️ Download TMB" onPress={handleDownload}/>
-
-                        <View style={{marginTop: 10}}/>
+                        <Button title="⬇️ Download TMB" onPress={handleDownload} />
+                        <View style={{ marginTop: 10 }} />
                         <Button
-                            title="🗑️ Verwijder kaart"
+                            title="🗑️ Delete map"
                             color="red"
                             onPress={async () => {
                                 await deleteOfflinePack();
-                                setDeleteMessage('✅ Kaart verwijderd');
+                                setDeleteMessage('✅ Offline map deleted');
                                 setTimeout(() => setDeleteMessage(''), 3000);
                                 setProgress(0);
                                 setIsDownloading(false);
@@ -59,27 +74,33 @@ export default function MapOfflinePopup() {
                         />
 
                         {progress > 0 && (
-                            <View style={{marginTop: 20, alignItems: 'center'}}>
-                                <Progress.Bar progress={progress / 100} width={200}/>
+                            <View style={{ marginTop: 20, alignItems: 'center' }}>
+                                <Progress.Bar progress={progress / 100} width={200} />
                                 <Text>{progress.toFixed(1)}%</Text>
                             </View>
                         )}
                         {!isDownloading && progress === 100 && (
-                            <Text style={{marginTop: 10, color: 'green'}}>✅ Download voltooid</Text>
+                            <Text style={{ marginTop: 10, color: 'green' }}>✅ Download complete</Text>
                         )}
                         {deleteMessage !== '' && (
-                            <Text style={{marginTop: 10, color: 'green'}}>{deleteMessage}</Text>
+                            <Text style={{ marginTop: 10, color: 'green' }}>{deleteMessage}</Text>
+                        )}
+                        {errorMessage !== '' && (
+                            <Text style={{ marginTop: 10, color: 'red', textAlign: 'center' }}>
+                                {errorMessage}
+                            </Text>
                         )}
 
-                        <View style={{marginTop: 20}}>
+                        <View style={{ marginTop: 20 }}>
                             <Button
-                                title="Sluiten"
+                                title="Close"
                                 onPress={() => {
                                     setVisible(false);
                                     setProgress(0);
                                     setIsDownloading(false);
                                     setDeleteMessage('');
                                     setDownloadMessage('');
+                                    setErrorMessage('');
                                 }}
                             />
                         </View>
